@@ -1,5 +1,16 @@
 import sys
 
+## Ease Of Use functions
+def get_bin(num, length):
+    # Returns num in binary format extended to given length
+    b = "0b" + format((num % (1 << length)) , f"0{length}b")
+    return b
+
+def get_hex(num, length):
+    # Returns num in hex format extended to given length
+    h = "0x" + format(num, f"0{length}x").upper()
+    return h
+
 def get_field(s):
     # Returns int from binary
     return int(s, 2)
