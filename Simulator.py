@@ -34,13 +34,13 @@ def create_memory_and_reg_set():
     reg_set = []
 
     for i in range(32):
-        temp = "0b00000000000000000000000000000000"
+        temp = get_bin(0, 32)
         data_memory.append(temp)
         stack_memory.append(temp)
         program_memory.extend([temp[2:], temp[2:]])
         reg_set.append(temp)
     
-    reg_set[2] = "0b00000000000000000000000101111100"
+    reg_set[2] = get_bin(380, 32)
     
     return data_memory, stack_memory, program_memory, reg_set
 
@@ -49,13 +49,12 @@ def memory_dump(data_memory, file):
     address = int("0x00010000", 0)
 
     for word in data_memory:
-        h = "0x" + format(word, "08x").upper()
-        file.write(f"{h}:{word}\n")
+        file.write(f"{get_hex(address, 8)}:{word}\n")
         address += 4
 
 def reg_dump(pc, reg_set, file):
     # Writes all register data to file
-    file.write("0b" + format(pc, "032b"))
+    file.write(get_bin(pc, 32))
 
     for reg in reg_set:
         file.write(f" {reg}")
