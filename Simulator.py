@@ -1,5 +1,19 @@
 import sys
 
+def get_field(s):
+    # Returns int from binary
+    return int(s, 2)
+
+def get_num(s, length = 32, unsigned = False):
+    # Returns int from binary, handles 2's complement form & unsigned form
+    num = int(s, 0)
+    num &= (1 << length) - 1
+
+    if not unsigned and num >= (1 << (length - 1)):
+        num -= (1 << length)
+
+    return num
+
 ## Initialization and Write functions
 def create_memory_and_reg_set():
     # Initializes data_memory and registers and sets all values to 0, and stack pointer to 380
