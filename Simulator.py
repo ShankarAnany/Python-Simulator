@@ -358,8 +358,9 @@ def main():
 
         reg_dump(pc, reg_set, out_file)
 
-    reg_dump(pc, reg_set, out_file)
-    memory_dump(data_memory, out_file)
+    if not error:
+        reg_dump(pc, reg_set, out_file)
+        memory_dump(data_memory, out_file)
 
     out_file.close()
 
