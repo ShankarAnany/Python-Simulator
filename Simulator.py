@@ -70,33 +70,33 @@ def i_type_alu(instr, reg_set):
 
 def i_type_lw(instr, reg_set, data_memory, stack_memory):
     imm = instr[0:12]
-    rs_1 = get_field(instr[12:17])
-    funct_3 = instr[17:20]
+    rs1 = get_field(instr[12:17])
+    funct3 = instr[17:20]
     rd = get_field(instr[20:25])
 
-    off_set = get_num("0b" + imm, 12)
-    base = get_num(reg_set[rs_1])
+    offset = get_num("0b" + imm, 12)
+    base = get_num(reg_set[rs1])
 
-    adress = base + off_set
+    addr = base + offset
 
-    if adress in range(65536, 65664):
-        base_adress = 65536
-    elif adress in range(256, 380):
-        base_adress = 256
+    if addr in range(65536, 65664):
+        base_addr = 65536
+    elif addr in range(256, 380):
+        base_addr = 256
 
-    rel_adress = (adress - base_adress)
+    rel_addr = (addr - base_addr)
 
-    if rel_adress % 4 != 0:
+    if rel_addr % 4 != 0:
         print("Illegal Memory Access", end = "")
         return reg_set
 
-    index = rel_adress // 4
+    index = rel_addr // 4
 
     result = get_bin(0, 32)
-    if funct_3 == "010":
-        if base_adress == 65536:
+    if funct3 == "010":
+        if base_addr == 65536:
             result = data_memory[index]
-        elif base_adress == 256:
+        elif base_addr == 256:
             result = stack_memory[index]
 
     if rd != 0:
@@ -109,33 +109,33 @@ def i_type_jalr(instr, reg_set, pc):
 
 def s_type(instr, reg_set, data_memory, stack_memory):
     imm = instr[0:7] + instr[20:25]
-    rs_2 = get_field(instr[7:12])
-    rs_1 = get_field(instr[12:17])
+    rs2 = get_field(instr[7:12])
+    rs1 = get_field(instr[12:17])
     funct3 = instr[17:20]
 
-    off_set = get_num("0b" + imm, 12)
-    base = get_num(reg_set[rs_1])
-    data = reg_set[rs_2]
+    offset = get_num("0b" + imm, 12)
+    base = get_num(reg_set[rs1])
+    data = reg_set[rs2]
 
-    adress = base + off_set
+    addr = base + offset
 
-    if adress in range(65536, 65664):
-        base_adress = 65536
-    elif adress in range(256, 380):
-        base_adress = 256
+    if addr in range(65536, 65664):
+        base_addr = 65536
+    elif addr in range(256, 380):
+        base_addr = 256
 
-    rel_adress = (adress - base_adress)
+    rel_addr = (addr - base_addr)
 
-    if rel_adress % 4 != 0:
+    if rel_addr % 4 != 0:
         print("Illegal Memory Access")
         return data_memory, stack_memory
 
-    index = rel_adress // 4
+    index = rel_addr // 4
 
     if funct3 == "010":
-        if base_adress == 65536:
+        if base_addr == 65536:
             data_memory[index] = data
-        elif base_adress == 256:
+        elif base_addr == 256:
             stack_memory[index] = data
 
     return data_memory, stack_memory
