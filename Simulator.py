@@ -70,33 +70,33 @@ def i_type_alu(instr, reg_set):
 
 def i_type_lw(instr, reg_set, data_memory, stack_memory):
     imm = instr[0:12]
-    rs1 = get_field(instr[12:17])
-    funct3 = instr[17:20]
+    rs_1 = get_field(instr[12:17])
+    funct_3 = instr[17:20]
     rd = get_field(instr[20:25])
 
-    offset = get_num("0b" + imm, 12)
-    base = get_num(reg_set[rs1])
+    off_set = get_num("0b" + imm, 12)
+    base = get_num(reg_set[rs_1])
 
-    addr = base + offset
+    adress = base + off_set
 
-    if addr in range(65536, 65664):
-        base_addr = 65536
-    elif addr in range(256, 380):
-        base_addr = 256
+    if adress in range(65536, 65664):
+        base_adress = 65536
+    elif adress in range(256, 380):
+        base_adress = 256
 
-    rel_addr = (addr - base_addr)
+    rel_adress = (adress - base_adress)
 
-    if rel_addr % 4 != 0:
+    if rel_adress % 4 != 0:
         print("Illegal Memory Access", end = "")
         return reg_set
 
-    index = rel_addr // 4
+    index = rel_adress // 4
 
     result = get_bin(0, 32)
-    if funct3 == "010":
-        if base_addr == 65536:
+    if funct_3 == "010":
+        if base_adress == 65536:
             result = data_memory[index]
-        elif base_addr == 256:
+        elif base_adress == 256:
             result = stack_memory[index]
 
     if rd != 0:
@@ -109,38 +109,69 @@ def i_type_jalr(instr, reg_set, pc):
 
 def s_type(instr, reg_set, data_memory, stack_memory):
     imm = instr[0:7] + instr[20:25]
-    rs2 = get_field(instr[7:12])
-    rs1 = get_field(instr[12:17])
+    rs_2 = get_field(instr[7:12])
+    rs_1 = get_field(instr[12:17])
     funct3 = instr[17:20]
 
-    offset = get_num("0b" + imm, 12)
-    base = get_num(reg_set[rs1])
-    data = reg_set[rs2]
+    off_set = get_num("0b" + imm, 12)
+    base = get_num(reg_set[rs_1])
+    data = reg_set[rs_2]
 
-    addr = base + offset
+    adress = base + off_set
 
-    if addr in range(65536, 65664):
-        base_addr = 65536
-    elif addr in range(256, 380):
-        base_addr = 256
+    if adress in range(65536, 65664):
+        base_adress = 65536
+    elif adress in range(256, 380):
+        base_adress = 256
 
-    rel_addr = (addr - base_addr)
+    rel_adress = (adress - base_adress)
 
-    if rel_addr % 4 != 0:
+    if rel_adress % 4 != 0:
         print("Illegal Memory Access")
         return data_memory, stack_memory
 
-    index = rel_addr // 4
+    index = rel_adress // 4
 
     if funct3 == "010":
-        if base_addr == 65536:
+        if base_adress == 65536:
             data_memory[index] = data
-        elif base_addr == 256:
+        elif base_adress == 256:
             stack_memory[index] = data
 
     return data_memory, stack_memory
 
 def b_type(instr, reg_set, pc):
+    imm = instr[0] + instr[24:25] + instr[1:7] + instr[20:24] + "0"
+    rs2 = get_field(instr[7:12])
+    rs1 = get_field(instr[12:17])
+    funct3 = instr[17:20]
+
+    op1 = get_num(reg_set[rs1])
+    op2 = get_num(reg_set[rs2])
+    op1u = get_num(reg_set[rs1], unsigned = True)
+    op2u = get_num(reg_set[rs2], unsigned = True)
+
+    offset = get_num("0b" + imm, 13)
+
+    take_branch = False
+    if funct3 == "000":
+        take_branch = (op1 == op2)
+    elif funct3 == "001":
+        take_branch = (op1 != op2)
+    elif funct3 == "100":
+        take_branch = (op1 < op2)
+    elif funct3 == "101":
+        take_branch = (op1 >= op2)
+    elif funct3 == "110":
+        take_branch = (op1u < op2u)
+    elif funct3 == "111":
+        take_branch = (op1u >= op2u)
+
+    if take_branch:
+        pc += offset
+    else:
+        pc += 4
+
     return pc
 
 def u_type_lui(instr, reg_set):
