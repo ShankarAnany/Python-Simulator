@@ -63,10 +63,69 @@ def reg_dump(pc, reg_set, file):
 
 ## Simulator functions
 def r_type(instr, reg_set):
+    funct7 = instr[0:7]
+    rs2 = get_field(instr[7:12])
+    rs1 = get_field(instr[12:17])
+    funct3 = instr[17:20]
+    rd = get_field(instr[20:25])
+
+    op1 = get_num(reg_set[rs1])
+    op2 = get_num(reg_set[rs2])
+    op1u = get_num(reg_set[rs1], unsigned = True)
+    op2u = get_num(reg_set[rs2], unsigned = True)
+
+    shift_amt = op2 & 0b11111
+
+    result = get_bin(0, 32)
+    if funct7 == "0000000":
+        if funct3 == "000":
+            result = get_bin(op1 + op2, 32)
+        elif funct3 == "001":
+            result = get_bin(op1 << shift_amt, 32)
+        elif funct3 == "010":
+            result = get_bin(int(op1 < op2), 32)
+        elif funct3 == "011":
+            result = get_bin(int(op1u < op2u), 32)
+        elif funct3 == "100":
+            result = get_bin(op1 ^ op2, 32)
+        elif funct3 == "101":
+            result = get_bin(op1u >> shift_amt, 32)
+        elif funct3 == "110":
+            result = get_bin(op1 | op2, 32)
+        elif funct3 == "111":
+            result = get_bin(op1 & op2, 32)
+    elif funct7 == "0100000":
+        if funct3 == "000":
+            result = get_bin(op1 - op2, 32)
+    
+    # x0 is not written to
+    if rd != 0:
+        reg_set[rd] = result
+
     return reg_set
 
 def i_type_alu(instr, reg_set):
+    imm = "0b" + instr[:12]
+    rs1 = get_field(instr[12:17])
+    funct3 = instr[17:20]
+    rd = get_field(instr[20:25])
+
+    opi = get_num(imm, length = 12)
+    op1 = get_num(reg_set[rs1])
+    opiu = opi & 0xFFF # IMPORTANT
+    op1u = get_num(reg_set[rs1], unsigned = True)
+
+    result = get_bin(0, 32)
+    if funct3 == "000":
+        result = get_bin(op1 + opi, 32)
+    elif funct3 == "011":
+        result = get_bin(int(op1u < opiu), 32)
+
+    if rd != 0:
+        reg_set[rd] = result
+
     return reg_set
+
 
 def i_type_lw(instr, reg_set, data_memory, stack_memory):
     imm = instr[0:12]
