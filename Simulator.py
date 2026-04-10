@@ -248,6 +248,17 @@ def u_type_lui(instr, reg_set):
     return reg_set
 
 def u_type_auipc(instr, reg_set, pc):
+    imm = instr[0:20]
+    rd = get_field(instr[20:25])
+
+    opi = get_num(imm, length = 20)
+    offset = opi << 12
+
+    result = get_bin(pc + offset, 32)
+
+    if rd != 0:
+        reg_set[rd] = result
+
     return reg_set
 
 def j_type(instr, reg_set, pc):
