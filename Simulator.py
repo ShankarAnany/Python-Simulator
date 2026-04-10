@@ -262,6 +262,17 @@ def u_type_auipc(instr, reg_set, pc):
     return reg_set
 
 def j_type(instr, reg_set, pc):
+    imm = instr[0] + instr[12:20] + instr[11] + instr[1:11] + "0"
+    rd = get_field(instr[20:25])
+
+    offset = get_num("0b" + imm, 21)
+    addr = get_bin(pc + 4, 32)
+
+    pc += offset
+
+    if rd != 0:
+        reg_set[rd] = addr
+
     return reg_set, pc
 
 ## Main Program
